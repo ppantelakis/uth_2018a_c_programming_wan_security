@@ -7,6 +7,7 @@
 //
 //TCP Header Length
 //https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+//20 Bytes = 160 bits
 main()
 {
 	printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
