@@ -1,5 +1,7 @@
+//Function for getting current timestamp
 char* get_curr_time()
 {
+    //We need to use pointer due to return the address of variable, otherwise the variable is local
     char *buff_time = malloc(100 * sizeof(char));
     time_t now = time (0);
     strftime (buff_time, 100, "%Y-%m-%d %H:%M:%S", localtime (&now));
