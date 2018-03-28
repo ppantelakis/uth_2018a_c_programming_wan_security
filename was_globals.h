@@ -7,4 +7,7 @@
 //Command size
 #define CMD_SIZE        512
 
+//Command line in iptables
+#define CMD_LINE        512
+
 
