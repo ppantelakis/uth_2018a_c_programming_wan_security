@@ -20,5 +20,5 @@ char* iptables_add_rule( char * ip )
 //Function for application signals
 void app_signals( int sig )
 {
-
+    syslog(LOG_WARNING, "Received SIGHUP signal.");
 }
