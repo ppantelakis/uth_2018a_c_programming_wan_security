@@ -16,3 +16,9 @@ char* iptables_add_rule( char * ip )
     sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", CMD_LINE, ip,  get_curr_time());
     return cmd;
 }
+
+//Function for application signals
+void app_signals( int sig )
+{
+
+}
