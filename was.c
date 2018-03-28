@@ -1,15 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "was_globals.h"
 #include "was_structs.h"
 #include "was_functions.h"
-
+char* get_curr_time();
 main()
 {
-    char buff_time[100];
-    time_t now = time (0);
-    strftime (buff_time, 100, "%Y-%m-%d %H:%M:%S", localtime (&now));
+    char *currdt = get_curr_time();
     printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
-    printf("Daemon has started at:%s\n",buff_time);
+    printf("Daemon has started at:%s\n",get_curr_time());
     return 0;
 }
+
