@@ -18,9 +18,33 @@ char* iptables_add_rule( char * ip )
 }
 
 //Function for application signals
+//http://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html
+//https://www.thegeekstuff.com/2012/03/catch-signals-sample-c-code/
 void app_signals( int sig )
 {
-    syslog(LOG_WARNING, "Received SIGHUP signal.");
-    syslog(LOG_WARNING, "Received SIGTERM signal.");
-    syslog(LOG_WARNING, "Unhandled signal (%d) %s", sig, strsignal(sig) );
+    if(sig==SIGHUP)
+    {
+        syslog(LOG_WARNING, "Received SIGHUP signal.");
+        exit(EXIT_FAILURE);
+    }
+    else if(sig==SIGTERM)
+    {
+        syslog(LOG_WARNING, "Received SIGTERM signal.");
+        exit(EXIT_FAILURE);
+    }
+    else if(sig==SIGINT)
+    {
+        syslog(LOG_WARNING, "Received SIGINT signal.");
+        exit(EXIT_FAILURE);
+    }
+    else if(sig==SIGINT)
+    {
+        syslog(LOG_WARNING, "Received SIGQUIT signal.");
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        syslog(LOG_WARNING, "Unhandled signal (%d) %s", sig, strsignal(sig) );
+    }
+    
 }

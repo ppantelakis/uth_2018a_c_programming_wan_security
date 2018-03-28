@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <syslog.h>
+#include <signal.h>
 #include "was_globals.h"
 #include "was_structs.h"
 #include "was_functions.h"
