@@ -8,6 +8,7 @@ char* get_curr_time()
     return buff_time;
 }
 
+//function for insert iptables rule to iptables firewall
 char* iptables_add_rule( char * ip )
 {
     static char cmd[ CMD_SIZE ];
