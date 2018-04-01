@@ -18,6 +18,7 @@ main()
     //http://www.gnu.org/software/libc/manual/html_node/openlog.html
     openlog( "WAS", LOG_CONS, LOG_USER );
     //Start the Daemon process the core of the programm
+    syslog( LOG_INFO, "WAS is starting up" ); 
     
 
     return 0;
