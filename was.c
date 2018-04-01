@@ -17,6 +17,11 @@ main()
     setlogmask( LOG_UPTO(LOG_INFO) );
     //http://www.gnu.org/software/libc/manual/html_node/openlog.html
     openlog( "WAS", LOG_CONS, LOG_USER );
+    //Initialize signals
+    signal(SIGHUP, signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
+    signal(SIGQUIT, signal_handler);
     //Start the Daemon process the core of the programm
     syslog( LOG_INFO, "WAS is starting up" ); 
     
