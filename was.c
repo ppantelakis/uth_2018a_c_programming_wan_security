@@ -51,7 +51,7 @@ main()
     syslog( LOG_INFO, "Daemon was started successfully" ); 
 
     
-
+    syslog( LOG_INFO, "WAS is exiting!" ); 
     return 0;
 }
 
