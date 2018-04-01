@@ -9,6 +9,7 @@
 char* get_curr_time();
 main()
 {
+    pid_t pid, sid; //pid: Main proccess id, sid:Child proccess id where is running as daemon
     printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
     printf("Daemon has started at:%s\n",get_curr_time());
     //Set the log level
