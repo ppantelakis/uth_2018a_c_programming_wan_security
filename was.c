@@ -48,7 +48,7 @@ main()
             exit(EXIT_FAILURE);
         }
     }
-    
+    syslog( LOG_INFO, "Daemon was started successfully" ); 
 
     
 
