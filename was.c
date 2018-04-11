@@ -32,6 +32,7 @@ main()
     was_daemon();
     while(1)
     {
+        //TODO : Check for port scanning
         //http://codewiki.wikidot.com/c:system-calls:read
         //Waiting for first port hit
         if(read(fd, read_buffer, BUFFER_SIZE) > 0)
@@ -51,6 +52,8 @@ main()
                 //Waiting for second port hit
                 while(1)
                 {
+                    //TODO: Extra checks for ports and timeouts
+                    //TODO: check for same ip
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
                         //Check if second port is hitted
@@ -61,6 +64,7 @@ main()
                             strcpy( in_ipaddr, inet_ntoa( addr ) );
                             syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
                             was_iptables_add_rule(in_ipaddr);
+                            //TODO call system to add rule
                             break;
                         }
                     }
