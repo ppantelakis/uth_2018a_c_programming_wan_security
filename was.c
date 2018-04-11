@@ -16,13 +16,14 @@ main()
     //http://man7.org/linux/man-pages/man2/socket.2.html
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     char read_buffer[BUFFER_SIZE];
-    
+
     printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
     printf("Daemon has started at:%s\n",was_get_curr_time());
     was_enable_signals();
-    was_daemon(); 
+    was_daemon();
     while(1)
     {
+        //http://codewiki.wikidot.com/c:system-calls:read
         if(read(fd, read_buffer, BUFFER_SIZE) > 0)
         {
             //IPV4 size 16
@@ -30,12 +31,12 @@ main()
         }
         else
         {
-            syslog( LOG_ERR, "Could not read from network. Check if the user has rights to read from network!" ); 
+            syslog( LOG_ERR, "Could not read from network. Check if the user has rights to read from network!" );
             break;
         }
     }
-    
-    syslog( LOG_INFO, "WAS is exiting!" ); 
+
+    syslog( LOG_INFO, "WAS is exiting!" );
     return 0;
 }
 
