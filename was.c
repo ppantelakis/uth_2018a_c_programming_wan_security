@@ -16,6 +16,15 @@ main()
     //http://man7.org/linux/man-pages/man2/socket.2.html
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     char read_buffer[BUFFER_SIZE];
+    //http://www.tenouk.com/Module43a.html
+    //Raw socket anatomy http://www.cs.binghamton.edu/~steflik/cs455/rawip.txt
+    //The (simplified) link layer model looks like this:
+    //Physical layer -> Device layer (Ethernet protocol) -> Network layer (IP) ->
+    //Transport layer (TCP, UDP, ICMP) -> Session layer (application specific data)
+    //Ip buffer
+    struct ipheader *was_ip = (struct ipheader *) read_buffer;
+    //Tcp buffer
+    struct tcpheader *was_tcp = (struct tcpheader *) (read_buffer + sizeof(struct ipheader));
 
     printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
     printf("Daemon has started at:%s\n",was_get_curr_time());
@@ -28,6 +37,18 @@ main()
         {
             //IPV4 size 16
             char in_ipaddr[ 16 ];
+            //Check if tcp port is equal with port1
+            if( htons(was_tcp->th_dport) == PORT1 )
+            {
+                //Get current timestamp
+                time_t timestamp = time( NULL );
+                //Create a local variable of type in_addr
+                struct in_addr addr;
+                //In local variable addr.s_addr set the value of source ip
+                addr.s_addr = was_ip->ip_src;
+
+                //Waiting for second port
+            }
         }
         else
         {
