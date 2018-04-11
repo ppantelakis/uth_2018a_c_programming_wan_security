@@ -21,11 +21,18 @@ main()
     printf("Daemon has started at:%s\n",was_get_curr_time());
     was_enable_signals();
     was_daemon(); 
-    // Listen to the network and wait for someone to connect to the first port
-    while( read(fd, read_buffer, BUFFER_SIZE) > 0 )
+    while(1)
     {
-        //IPV4 size 16
-        char in_ipaddr[ 16 ];
+        if(read(fd, read_buffer, BUFFER_SIZE) > 0)
+        {
+            //IPV4 size 16
+            char in_ipaddr[ 16 ];
+        }
+        else
+        {
+            syslog( LOG_ERR, "Could not read from network. Check if the user has rights to read from network!" ); 
+            break;
+        }
     }
     
     syslog( LOG_INFO, "WAS is exiting!" ); 
