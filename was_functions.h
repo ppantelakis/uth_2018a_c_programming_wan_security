@@ -1,5 +1,5 @@
 //Function for getting current timestamp
-char* get_curr_time()
+char* was_get_curr_time()
 {
     //We need to use pointer due to return the address of variable, otherwise the variable is local
     char *buff_time = malloc(100 * sizeof(char));
@@ -9,18 +9,18 @@ char* get_curr_time()
 }
 
 //Function for insert iptables rule to iptables firewall
-char* iptables_add_rule( char * ip )
+char* was_iptables_add_rule( char * ip )
 {
     static char cmd[ CMD_SIZE ];
     //iptables -I INPUT 2 -p tcp -m state --state NEW -m tcp -s 8.8.8.8 -m comment --comment \"was opened port at 12:23 28/02/2018\"  -j ACCEPT
-    sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", CMD_LINE, ip,  get_curr_time());
+    sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", CMD_LINE, ip,  was_get_curr_time());
     return cmd;
 }
 
 //Function for application signals
 //http://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html
 //https://www.thegeekstuff.com/2012/03/catch-signals-sample-c-code/
-void app_signals( int sig )
+void was_app_signals( int sig )
 {
     if(sig==SIGHUP)
     {
@@ -47,4 +47,30 @@ void app_signals( int sig )
         syslog(LOG_WARNING, "Unhandled signal (%d) %s", sig, strsignal(sig) );
     }
     
+}
+
+void was_enable_signals()
+{
+    //Set the log level
+    //http://www.gnu.org/software/libc/manual/html_node/setlogmask.html
+    //https://linux.die.net/man/3/setlogmask
+    setlogmask( LOG_UPTO(LOG_INFO) );
+    //http://www.gnu.org/software/libc/manual/html_node/openlog.html
+    openlog( "WAS", LOG_CONS, LOG_USER );
+    //Initialize signals
+    signal(SIGHUP, was_app_signals);
+    signal(SIGTERM, was_app_signals);
+    signal(SIGINT, was_app_signals);
+    signal(SIGQUIT, was_app_signals);
+    //Start the Daemon process the core of the programm
+    syslog( LOG_INFO, "WAS is starting up" );
+    syslog( LOG_INFO, "WAS is trying to start Daemon" ); 
+}
+
+//Created function for Daemon
+//https://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux
+
+static void was_daemon()
+{
+
 }

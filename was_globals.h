@@ -10,4 +10,7 @@
 //Command line in iptables usually 2-3 first lines are used for loopback and established connections  
 #define CMD_LINE        3
 
+//Read buffer size
+#define BUFFER_SIZE      8192
+
 

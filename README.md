@@ -3,3 +3,6 @@
 # Developers
 # Panagiotis Pantelakis panagiotis.pantelakis@gmail.com
 # George Mitrou georgebitzi@gmail.com
+# On bash run
+# make
+# after that command a file was.o will be created which is the executable
