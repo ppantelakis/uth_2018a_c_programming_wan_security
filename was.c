@@ -33,6 +33,7 @@ main()
     while(1)
     {
         //http://codewiki.wikidot.com/c:system-calls:read
+        //Waiting for first port hit
         if(read(fd, read_buffer, BUFFER_SIZE) > 0)
         {
             //IPV4 size 16
@@ -47,12 +48,33 @@ main()
                 //In local variable addr.s_addr set the value of source ip
                 addr.s_addr = was_ip->ip_src;
 
-                //Waiting for second port
+                //Waiting for second port hit
+                while(1)
+                {
+                    if(read(fd, read_buffer, BUFFER_SIZE) > 0)
+                    {
+                        //Check if second port is hitted
+                        if( htons(was_tcp->th_dport) == PORT2 )
+                        {
+                            //https://linux.die.net/man/3/inet_ntoa
+                            //Copy internet address to string
+                            strcpy( in_ipaddr, inet_ntoa( addr ) );
+                            syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                            was_iptables_add_rule(in_ipaddr);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        syslog( LOG_ERR, "Could not read from network while waiting for second hit. Check if the user has rights to read from network!" );
+                        break;
+                    }
+                }
             }
         }
         else
         {
-            syslog( LOG_ERR, "Could not read from network. Check if the user has rights to read from network!" );
+            syslog( LOG_ERR, "Could not read from network while waiting for first hit. Check if the user has rights to read from network!" );
             break;
         }
     }
