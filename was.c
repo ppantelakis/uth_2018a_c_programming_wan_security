@@ -55,19 +55,20 @@ main()
                 //Waiting for second port hit
                 while(1)
                 {
-                    //If current timestamp > wait timeout then break and wait for first port hit again
-                    if( time( NULL ) > timestamp + MAX_WAIT_SECOND_HIT )
-                    {
-                        break;
-                    }
-                    //Detect serial port scanning
-                    //https://en.wikipedia.org/wiki/Port_scanner
-                    if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
-                    {
-                        break;
-                    }
+
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
+                        //If current timestamp > wait timeout then break and wait for first port hit again
+                        if( time( NULL ) > timestamp + MAX_WAIT_SECOND_HIT )
+                        {
+                            break;
+                        }
+                        //Detect serial port scanning
+                        //https://en.wikipedia.org/wiki/Port_scanner
+                        if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
+                        {
+                            break;
+                        }
                         //https://linux.die.net/man/3/inet_ntoa
                         //Copy internet address to string
                         strcpy( in_ipaddr, inet_ntoa( addr ) );
