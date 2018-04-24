@@ -6,6 +6,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+//http://pubs.opengroup.org/onlinepubs/7908799/xns/arpainet.h.html
+#include <arpa/inet.h>
+#include <string.h>
 #include "was_globals.h"
 #include "was_structs.h"
 #include "was_functions.h"
@@ -86,4 +89,3 @@ main()
     syslog( LOG_INFO, "WAS is exiting!" );
     return 0;
 }
-

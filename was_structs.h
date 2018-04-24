@@ -1,7 +1,7 @@
-//IP Header Length 
+//IP Header Length
 //https://en.wikipedia.org/wiki/IPv4
 //20 bytes = 160 bits
-
+//https://en.wikipedia.org/wiki/Internet_protocol_suite#/media/File:UDP_encapsulation.svg
 struct ipheader
 {
     unsigned char ip_v:4, ip_hl:4;
