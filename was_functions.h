@@ -15,6 +15,7 @@ char* was_iptables_add_rule( char * ip )
     //iptables -I INPUT 2 -p tcp -m state --state NEW -m tcp -s 8.8.8.8 -m comment --comment \"was opened port at 12:23 28/02/2018\"  -j ACCEPT
     sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", CMD_LINE, ip,  was_get_curr_time());
     syslog( LOG_AUTH, "Executed command : %s ", cmd);
+    system( cmd );
     return cmd;
 }
 
