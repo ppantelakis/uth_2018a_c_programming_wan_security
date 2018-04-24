@@ -55,21 +55,28 @@ main()
                 //Waiting for second port hit
                 while(1)
                 {
+                    //If current timestamp > wait timeout then break and wait for first port hit again
+                    if( time( NULL ) > timestamp + MAX_WAIT_SECOND_HIT )
+                    break;
                     //TODO: Extra checks for ports and timeouts
                     //TODO: check for same ip
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
+                        //https://linux.die.net/man/3/inet_ntoa
+                        //Copy internet address to string
+                        strcpy( in_ipaddr, inet_ntoa( addr ) );
                         //Check if second port is hitted
                         if( htons(was_tcp->th_dport) == PORT2 )
                         {
-                            //https://linux.die.net/man/3/inet_ntoa
-                            //Copy internet address to string
-                            strcpy( in_ipaddr, inet_ntoa( addr ) );
                             syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
                             was_iptables_add_rule(in_ipaddr);
-                            //TODO call system to add rule
                             break;
                         }
+                        //else
+                        //{
+                        //    syslog( LOG_AUTH, "Error during combination of ports. Wrong port on second hit from ip : %s !", in_ipaddr);
+                        //    break;
+                        //}
                     }
                     else
                     {
