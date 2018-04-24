@@ -60,9 +60,12 @@ main()
                     {
                         break;
                     }
-
-                    //TODO: Extra checks for ports and timeouts
-                    //TODO: check for same ip
+                    //Detect serial port scanning
+                    //https://en.wikipedia.org/wiki/Port_scanner
+                    if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
+                    {
+                        break;
+                    }
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
                         //https://linux.die.net/man/3/inet_ntoa
@@ -75,11 +78,6 @@ main()
                             was_iptables_add_rule(in_ipaddr);
                             break;
                         }
-                        //else
-                        //{
-                        //    syslog( LOG_AUTH, "Error during combination of ports. Wrong port on second hit from ip : %s !", in_ipaddr);
-                        //    break;
-                        //}
                     }
                     else
                     {

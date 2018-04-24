@@ -14,7 +14,5 @@
 #define BUFFER_SIZE      8192
 
 //How many seconds wait for second hit
-
+//Be carefully with this constant on slow networks
 #define MAX_WAIT_SECOND_HIT 4
-
-
