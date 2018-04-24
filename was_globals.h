@@ -16,3 +16,7 @@
 //How many seconds wait for second hit
 //Be carefully with this constant on slow networks
 #define MAX_WAIT_SECOND_HIT 4
+
+//Wait time when port scanning is in action
+#define PORT_SCANNING_WAIT 55
+

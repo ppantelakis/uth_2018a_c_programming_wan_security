@@ -46,7 +46,7 @@ main()
             if( htons(was_tcp->th_dport) == PORT1 )
             {
                 //Get current timestamp
-                time_t timestamp = time( NULL );
+                time_t cur_timestamp = time( NULL );
                 //Create a local variable of type in_addr
                 struct in_addr addr;
                 //In local variable addr.s_addr set the value of source ip
@@ -59,25 +59,38 @@ main()
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
                         //If current timestamp > wait timeout then break and wait for first port hit again
-                        if( time( NULL ) > timestamp + MAX_WAIT_SECOND_HIT )
+                        if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
                         {
+                            syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
                             break;
                         }
                         //Detect serial port scanning
                         //https://en.wikipedia.org/wiki/Port_scanner
-                        if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
+                        else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
                         {
+                            syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
+                            time_t cur_timestamp2 = time( NULL );
+                            while(1)
+                            {
+                                if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
+                                {
+                                    break;
+                                }
+                            }
                             break;
                         }
-                        //https://linux.die.net/man/3/inet_ntoa
-                        //Copy internet address to string
-                        strcpy( in_ipaddr, inet_ntoa( addr ) );
-                        //Check if second port is hitted
-                        if( htons(was_tcp->th_dport) == PORT2 )
+                        else
                         {
-                            syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                            was_iptables_add_rule(in_ipaddr);
-                            break;
+                            //https://linux.die.net/man/3/inet_ntoa
+                            //Copy internet address to string
+                            strcpy( in_ipaddr, inet_ntoa( addr ) );
+                            //Check if second port is hitted
+                            if( htons(was_tcp->th_dport) == PORT2 )
+                            {
+                                syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                                was_iptables_add_rule(in_ipaddr);
+                                break;
+                            }
                         }
                     }
                     else
