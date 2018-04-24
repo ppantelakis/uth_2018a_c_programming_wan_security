@@ -14,6 +14,7 @@ char* was_iptables_add_rule( char * ip )
     static char cmd[ CMD_SIZE ];
     //iptables -I INPUT 2 -p tcp -m state --state NEW -m tcp -s 8.8.8.8 -m comment --comment \"was opened port at 12:23 28/02/2018\"  -j ACCEPT
     sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", CMD_LINE, ip,  was_get_curr_time());
+    syslog( LOG_AUTH, "Executed command : %s ", cmd);
     return cmd;
 }
 
@@ -46,7 +47,7 @@ void was_app_signals( int sig )
     {
         syslog(LOG_WARNING, "Unhandled signal (%d) %s", sig, strsignal(sig) );
     }
-    
+
 }
 
 void was_enable_signals()
@@ -64,7 +65,7 @@ void was_enable_signals()
     signal(SIGQUIT, was_app_signals);
     //Start the Daemon process the core of the programm
     syslog( LOG_INFO, "WAS is starting up" );
-    syslog( LOG_INFO, "WAS is trying to start Daemon" ); 
+    syslog( LOG_INFO, "WAS is trying to start Daemon" );
 }
 
 //Created function for Daemon
@@ -75,12 +76,12 @@ static void was_daemon()
     pid_t pid, sid; //pid: Main proccess id, sid:Child proccess id where is running as daemon
     //http://www.csl.mtu.edu/cs4411.ck/www/NOTES/process/fork/create.html
     pid = fork();
-    if (pid < 0) 
+    if (pid < 0)
     {
         //Couldn't create a child proccess
         exit(EXIT_FAILURE);
     }
-    else if (pid > 0) 
+    else if (pid > 0)
     {
         //We are in the main proccess, the operation succeded to create a child proccess so we can exit the main proccess
         exit(EXIT_SUCCESS);
