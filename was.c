@@ -19,6 +19,7 @@ main()
     //http://man7.org/linux/man-pages/man2/socket.2.html
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
     char read_buffer[BUFFER_SIZE];
+    printf("%ld",was_get_curr_time_ms());
     //http://www.tenouk.com/Module43a.html
     //Raw socket anatomy http://www.cs.binghamton.edu/~steflik/cs455/rawip.txt
     //The (simplified) link layer model looks like this:
