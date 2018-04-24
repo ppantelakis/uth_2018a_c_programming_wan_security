@@ -57,7 +57,10 @@ main()
                 {
                     //If current timestamp > wait timeout then break and wait for first port hit again
                     if( time( NULL ) > timestamp + MAX_WAIT_SECOND_HIT )
-                    break;
+                    {
+                        break;
+                    }
+
                     //TODO: Extra checks for ports and timeouts
                     //TODO: check for same ip
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
