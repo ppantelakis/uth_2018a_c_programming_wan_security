@@ -1,4 +1,5 @@
 //Function for getting current timestamp in milliseconds
+//https://stackoverflow.com/questions/12722904/how-to-use-struct-timeval-to-get-the-execution-time
 long int was_get_curr_time_ms()
 {
     struct timeval now;
@@ -6,10 +7,6 @@ long int was_get_curr_time_ms()
 
     rc=gettimeofday(&now, NULL);
     return ((now.tv_sec*1000000L)+now.tv_usec);
-    //if(rc==0) {
-    //    printf("gettimeofday() successful.\n");
-    //    printf("time = %u.%06u\n",
-    //            now.tv_sec, now.tv_usec);
 }
 
 //Function for getting current timestamp
