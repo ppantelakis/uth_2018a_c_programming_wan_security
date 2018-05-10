@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+//#include <stdlib.h>
+//#include <time.h>
 #include <syslog.h>
-#include <signal.h>
+//#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,7 +11,7 @@
 #include <string.h>
 #include "was_globals.h"
 #include "was_structs.h"
-#include "was_functions.h"
+
 
 main()
 {
