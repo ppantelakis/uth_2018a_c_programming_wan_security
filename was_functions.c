@@ -111,6 +111,67 @@ void was_daemon()
     syslog( LOG_INFO, "Daemon was started successfully" );
 }
 
+void was_listen_port2(struct in_addr addr)
+{
+    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+    char read_buffer[BUFFER_SIZE];
+    struct ipheader *was_ip = (struct ipheader *) read_buffer;
+    struct tcpheader *was_tcp = (struct tcpheader *) (read_buffer + sizeof(struct ipheader));
+    //Get current timestamp
+    time_t cur_timestamp = time( NULL );
+    //IPV4 size 16
+    char in_ipaddr[ 16 ];
+    while(1)
+    {
+        if(read(fd, read_buffer, BUFFER_SIZE) > 0)
+        {
+            //Check if this packet is from the same source. If not then ignore the following checks
+            if( addr.s_addr == was_ip->ip_src )
+            {
+                //If current timestamp > wait timeout then break and wait for first port hit again
+                if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
+                {
+                    syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
+                    break;
+                }
+                //Detect serial port scanning
+                //https://en.wikipedia.org/wiki/Port_scanner
+                else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
+                {
+                    syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
+                    time_t cur_timestamp2 = time( NULL );
+                    while(1)
+                    {
+                        if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
+                        {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                else
+                {
+                    //https://linux.die.net/man/3/inet_ntoa
+                    //Copy internet address to string
+                    strcpy( in_ipaddr, inet_ntoa( addr ) );
+                    //Check if second port is hitted
+                    if( htons(was_tcp->th_dport) == PORT2 )
+                    {
+                        syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                        was_iptables_add_rule(in_ipaddr);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            syslog( LOG_ERR, "Could not read from network while waiting for second hit. Check if the user has rights to read from network!" );
+            break;
+        }
+    }
+}
+
 void was_listen()
 {
     //Open a socket for IPV4, raw socket, tcp protocol
@@ -133,68 +194,16 @@ void was_listen()
         //Waiting for first port hit
         if(read(fd, read_buffer, BUFFER_SIZE) > 0)
         {
-            //IPV4 size 16
-            char in_ipaddr[ 16 ];
             //Check if tcp port is equal with port1
             if( htons(was_tcp->th_dport) == PORT1 )
             {
-                //Get current timestamp
-                time_t cur_timestamp = time( NULL );
+
                 //Create a local variable of type in_addr
                 struct in_addr addr;
                 //In local variable addr.s_addr set the value of source ip
                 addr.s_addr = was_ip->ip_src;
-
-                //Waiting for second port hit
-                while(1)
-                {
-                    if(read(fd, read_buffer, BUFFER_SIZE) > 0)
-                    {
-                        //Check if this packet is from the same source. If not then ignore the following checks
-                        if( addr.s_addr == was_ip->ip_src )
-                        {
-                            //If current timestamp > wait timeout then break and wait for first port hit again
-                            if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
-                            {
-                                syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
-                                break;
-                            }
-                            //Detect serial port scanning
-                            //https://en.wikipedia.org/wiki/Port_scanner
-                            else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
-                            {
-                                syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
-                                time_t cur_timestamp2 = time( NULL );
-                                while(1)
-                                {
-                                    if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
-                                    {
-                                        break;
-                                    }
-                                }
-                                break;
-                            }
-                            else
-                            {
-                                //https://linux.die.net/man/3/inet_ntoa
-                                //Copy internet address to string
-                                strcpy( in_ipaddr, inet_ntoa( addr ) );
-                                //Check if second port is hitted
-                                if( htons(was_tcp->th_dport) == PORT2 )
-                                {
-                                    syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                                    was_iptables_add_rule(in_ipaddr);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        syslog( LOG_ERR, "Could not read from network while waiting for second hit. Check if the user has rights to read from network!" );
-                        break;
-                    }
-                }
+                //Waiting for second port hit for this IP
+                was_listen_port2(addr);
             }
         }
         else
