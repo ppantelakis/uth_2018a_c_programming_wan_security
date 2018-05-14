@@ -19,3 +19,5 @@ void was_enable_signals();
 //https://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux
 
 void was_daemon();
+
+void was_listen();
