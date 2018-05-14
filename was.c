@@ -55,41 +55,44 @@ main()
                 //Waiting for second port hit
                 while(1)
                 {
-
                     if(read(fd, read_buffer, BUFFER_SIZE) > 0)
                     {
-                        //If current timestamp > wait timeout then break and wait for first port hit again
-                        if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
+                        //Check if this packet is from the same source. If not then ignore the following checks
+                        if( addr.s_addr == was_ip->ip_src )
                         {
-                            syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
-                            break;
-                        }
-                        //Detect serial port scanning
-                        //https://en.wikipedia.org/wiki/Port_scanner
-                        else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
-                        {
-                            syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
-                            time_t cur_timestamp2 = time( NULL );
-                            while(1)
+                            //If current timestamp > wait timeout then break and wait for first port hit again
+                            if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
                             {
-                                if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
+                                syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
+                                break;
+                            }
+                            //Detect serial port scanning
+                            //https://en.wikipedia.org/wiki/Port_scanner
+                            else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
+                            {
+                                syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
+                                time_t cur_timestamp2 = time( NULL );
+                                while(1)
                                 {
+                                    if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
+                                    {
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                            else
+                            {
+                                //https://linux.die.net/man/3/inet_ntoa
+                                //Copy internet address to string
+                                strcpy( in_ipaddr, inet_ntoa( addr ) );
+                                //Check if second port is hitted
+                                if( htons(was_tcp->th_dport) == PORT2 )
+                                {
+                                    syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                                    was_iptables_add_rule(in_ipaddr);
                                     break;
                                 }
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            //https://linux.die.net/man/3/inet_ntoa
-                            //Copy internet address to string
-                            strcpy( in_ipaddr, inet_ntoa( addr ) );
-                            //Check if second port is hitted
-                            if( htons(was_tcp->th_dport) == PORT2 )
-                            {
-                                syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                                was_iptables_add_rule(in_ipaddr);
-                                break;
                             }
                         }
                     }

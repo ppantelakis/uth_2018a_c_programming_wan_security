@@ -13,7 +13,7 @@
 //Read buffer size
 #define BUFFER_SIZE      8192
 
-//How many seconds wait for second hit
+//How many seconds wait for second hit from same IP
 //Be carefully with this constant on slow networks
 #define MAX_WAIT_SECOND_HIT 4
 
