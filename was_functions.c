@@ -9,6 +9,7 @@
 //http://pubs.opengroup.org/onlinepubs/7908799/xns/arpainet.h.html
 #include <arpa/inet.h>
 #include <string.h>
+#include <stdbool.h>
 #include "was_globals.h"
 #include "was_structs.h"
 #include "was_functions.h"
@@ -114,19 +115,35 @@ void was_daemon()
     syslog( LOG_INFO, "Daemon was started successfully" );
 }
 
-int was_iplog_is_blocked(long)
+int was_iplog_find_from_pos(long i)
 {
-    int ret = 1;
-    if(iplog_ptr[i].blocked_until_time<time( NULL ))
+    int ret = false;
+    if(i>=0)
     {
-        ret = 0;
+        ret = true;
+    }
+    return ret;
+}
+
+int was_iplog_is_blocked(long i)
+{
+    int ret = true;
+    if(was_iplog_find_from_pos(i)==false || iplog_ptr[i].blocked_until_time<time( NULL ))
+    {
+        ret = false;
     }
     return ret;
 }
 
 void was_iplog_block(long i)
 {
-    iplog_ptr[i].blocked_until_time = time( NULL ) + PORT_SCANNING_WAIT;
+    char in_ipaddr[ 16 ];
+    if(was_iplog_find_from_pos(i)==true)
+    {
+        strcpy( in_ipaddr, inet_ntoa( iplog_ptr[i].addr ) );
+        iplog_ptr[i].blocked_until_time = time( NULL ) + PORT_SCANNING_WAIT;
+        syslog( LOG_AUTH, "The ip %s has been blocked due to suspicius operations!", in_ipaddr);
+    }
     return;
 }
 
@@ -145,9 +162,12 @@ long was_iplog_find(struct in_addr addr)
 
 void was_iplog_remove(long i)
 {
-    iplog_ptr[i] = iplog_ptr[tot_iplog-1];
-    free(&iplog_ptr[tot_iplog-1]);
-    tot_iplog--;
+    if(was_iplog_find_from_pos(i)==true)
+    {
+        iplog_ptr[i] = iplog_ptr[tot_iplog-1];
+        free(&iplog_ptr[tot_iplog-1]);
+        tot_iplog--;
+    }
     return;
 }
 
@@ -156,57 +176,64 @@ void was_iplog_add(struct in_addr addr, long port)
     long i = was_iplog_find(addr);
     char in_ipaddr[ 16 ];
     strcpy( in_ipaddr, inet_ntoa( addr ) );
-    if(port==PORT1)
+    if(was_iplog_is_blocked(i)==false)
     {
-        //If exist the ip then remove from the arry of ips and continue
-        if(i>=0)
+        if(port==PORT1)
         {
-            was_iplog_remove(i);
-        }
-        //If array not initialized
-        if (!iplog_ptr)
-        {
-            tot_iplog = 1;
-            iplog_ptr = malloc(sizeof(struct iplog_t));
-        }
-        else
-        {
-            tot_iplog++;
-            iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
-        }
-        iplog_ptr[tot_iplog-1].addr = addr;
-        iplog_ptr[tot_iplog-1].blocked_until_time = 0;
-        iplog_ptr[tot_iplog-1].first_time = time( NULL );
-        iplog_ptr[tot_iplog-1].current_port = port;
-        syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
-        syslog( LOG_ERR, "Size of array of ips %d.",tot_iplog );
-    }
-    else if(port==PORT2)
-    {
-        //If exists the address that we are looking for then check if is valid the waiting time
-        if(i>=0)
-        {
-            //If
-            if( time( NULL ) < iplog_ptr[i].first_time + MAX_WAIT_SECOND_HIT )
+            //If exist the ip then remove from the array of ips and continue
+            if(was_iplog_find_from_pos(i)==true)
             {
-                //Go and open for specific ip
-                syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                was_iptables_add_rule(in_ipaddr);
+                was_iplog_remove(i);
+            }
+            //If array not initialized
+            if (!iplog_ptr)
+            {
+                tot_iplog = 1;
+                iplog_ptr = malloc(sizeof(struct iplog_t));
             }
             else
             {
-                syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
+                tot_iplog++;
+                iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
             }
-            was_iplog_remove(i);
+            iplog_ptr[tot_iplog-1].addr = addr;
+            iplog_ptr[tot_iplog-1].blocked_until_time = 0;
+            iplog_ptr[tot_iplog-1].first_time = time( NULL );
+            iplog_ptr[tot_iplog-1].current_port = port;
+            syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
+            syslog( LOG_ERR, "Size of array of ips %d.",tot_iplog );
+        }
+        else if(port==PORT2)
+        {
+            //If exists the address that we are looking for then check if is valid the waiting time
+            if(was_iplog_find_from_pos(i)==true)
+            {
+                //If
+                if( time( NULL ) < iplog_ptr[i].first_time + MAX_WAIT_SECOND_HIT )
+                {
+                    //Go and open for specific ip
+                    syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                    was_iptables_add_rule(in_ipaddr);
+                }
+                else
+                {
+                    syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
+                }
+                was_iplog_remove(i);
+            }
+            else
+            {
+                syslog( LOG_AUTH, "Second port hitted for ip %s but this ip does not exists in array of ips!", in_ipaddr);
+            }
         }
         else
         {
-            syslog( LOG_AUTH, "Second port hitted for ip %s but this ip does not exists in array of ips!", in_ipaddr);
+            syslog( LOG_AUTH, "Port not found: %ld !", port);
         }
     }
     else
     {
-        syslog( LOG_AUTH, "Port not found: %ld !", port);
+        syslog( LOG_AUTH, "The ip %s has already been blocked due to suspicius operations!", in_ipaddr);
     }
     return;
 }

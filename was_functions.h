@@ -20,6 +20,10 @@ void was_enable_signals();
 
 void was_daemon();
 
+//Check if a specific struct in position i exists to the array of ips
+//Return true if exists, false if not
+int was_iplog_find_from_pos(long);
+
 //Check if IP is blocked
 int was_iplog_is_blocked(long);
 
@@ -27,6 +31,7 @@ int was_iplog_is_blocked(long);
 void was_iplog_block(long);
 
 //Check if a specific ip exists to the array of ips
+//Return -1 if does not exist this ip
 long was_iplog_find(struct in_addr);
 
 //Remove ip from array of ips
