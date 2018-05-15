@@ -162,7 +162,7 @@ void was_iplog_add(struct in_addr addr, long port)
         iplog_ptr[tot_iplog-1].first_time = time( NULL );
         iplog_ptr[tot_iplog-1].current_port = port;
         syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
-        syslog( LOG_ERR, "Size %d.",tot_iplog );
+        syslog( LOG_ERR, "Size of array of ips %d.",tot_iplog );
     }
     else if(port==PORT2)
     {
@@ -175,6 +175,10 @@ void was_iplog_add(struct in_addr addr, long port)
                 //Go and open for specific ip
                 syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
                 was_iptables_add_rule(in_ipaddr);
+            }
+            else
+            {
+                syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
             }
             was_iplog_remove(i);
         }
@@ -232,107 +236,4 @@ int was_listen()
         }
     }
     return ret;
-}
-
-void was_listen_port2(struct in_addr addr)
-{
-    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
-    char read_buffer[BUFFER_SIZE];
-    struct ipheader *was_ip = (struct ipheader *) read_buffer;
-    struct tcpheader *was_tcp = (struct tcpheader *) (read_buffer + sizeof(struct ipheader));
-    //Get current timestamp
-    time_t cur_timestamp = time( NULL );
-    //IPV4 size 16
-    char in_ipaddr[ 16 ];
-    while(1)
-    {
-        if(read(fd, read_buffer, BUFFER_SIZE) > 0)
-        {
-            //Check if this packet is from the same source. If not then ignore the following checks
-            if( addr.s_addr == was_ip->ip_src )
-            {
-                //https://linux.die.net/man/3/inet_ntoa
-                //Copy internet address to string
-                strcpy( in_ipaddr, inet_ntoa( addr ) );
-                //If current timestamp > wait timeout then break and wait for first port hit again
-                if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
-                {
-                    syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
-                    break;
-                }
-                //Detect serial port scanning
-                //https://en.wikipedia.org/wiki/Port_scanner
-                else if( htons(was_tcp->th_dport) == PORT1 + 1 || htons(was_tcp->th_dport) == PORT1 - 1 )
-                {
-                    syslog( LOG_AUTH, "Port scanning detected on second port hit from ip: %s !", in_ipaddr);
-                    time_t cur_timestamp2 = time( NULL );
-                    while(1)
-                    {
-                        if( time( NULL ) > cur_timestamp2 + PORT_SCANNING_WAIT )
-                        {
-                            break;
-                        }
-                    }
-                    break;
-                }
-                else
-                {
-                    //Check if second port is hitted
-                    if( htons(was_tcp->th_dport) == PORT2 )
-                    {
-                        syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                        was_iptables_add_rule(in_ipaddr);
-                        break;
-                    }
-                }
-            }
-        }
-        else
-        {
-            syslog( LOG_ERR, "Could not read from network while waiting for second hit. Check if the user has rights to read from network!" );
-            break;
-        }
-    }
-}
-
-void was_listen_port1()
-{
-    //Open a socket for IPV4, raw socket, tcp protocol
-    //http://man7.org/linux/man-pages/man2/socket.2.html
-    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
-    char read_buffer[BUFFER_SIZE];
-    //http://www.tenouk.com/Module43a.html
-    //Raw socket anatomy http://www.cs.binghamton.edu/~steflik/cs455/rawip.txt
-    //The (simplified) link layer model looks like this:
-    //Physical layer -> Device layer (Ethernet protocol) -> Network layer (IP) ->
-    //Transport layer (TCP, UDP, ICMP) -> Session layer (application specific data)
-    //Ip buffer
-    struct ipheader *was_ip = (struct ipheader *) read_buffer;
-    //Tcp buffer
-    struct tcpheader *was_tcp = (struct tcpheader *) (read_buffer + sizeof(struct ipheader));
-    while(1)
-    {
-        //TODO : Check for port scanning
-        //http://codewiki.wikidot.com/c:system-calls:read
-        //Waiting for first port hit
-        if(read(fd, read_buffer, BUFFER_SIZE) > 0)
-        {
-            //Check if tcp port is equal with port1
-            if( htons(was_tcp->th_dport) == PORT1 )
-            {
-
-                //Create a local variable of type in_addr
-                struct in_addr addr;
-                //In local variable addr.s_addr set the value of source ip
-                addr.s_addr = was_ip->ip_src;
-                //Waiting for second port hit for this IP
-                was_listen_port2(addr);
-            }
-        }
-        else
-        {
-            syslog( LOG_ERR, "Could not read from network while waiting for first hit. Check if the user has rights to read from network!" );
-            break;
-        }
-    }
 }

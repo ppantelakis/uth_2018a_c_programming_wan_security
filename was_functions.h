@@ -30,7 +30,3 @@ void was_iplog_remove(long);
 void was_iplog_add(struct in_addr,long);
 
 int was_listen();
-
-void was_listen_port2(struct in_addr);
-
-void was_listen_port1();
