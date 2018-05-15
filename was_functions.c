@@ -114,6 +114,22 @@ void was_daemon()
     syslog( LOG_INFO, "Daemon was started successfully" );
 }
 
+int was_iplog_is_blocked(long)
+{
+    int ret = 1;
+    if(iplog_ptr[i].blocked_until_time<time( NULL ))
+    {
+        ret = 0;
+    }
+    return ret;
+}
+
+void was_iplog_block(long i)
+{
+    iplog_ptr[i].blocked_until_time = time( NULL ) + PORT_SCANNING_WAIT;
+    return;
+}
+
 long was_iplog_find(struct in_addr addr)
 {
     long i, ret = -1;
@@ -159,6 +175,7 @@ void was_iplog_add(struct in_addr addr, long port)
             iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
         }
         iplog_ptr[tot_iplog-1].addr = addr;
+        iplog_ptr[tot_iplog-1].blocked_until_time = 0;
         iplog_ptr[tot_iplog-1].first_time = time( NULL );
         iplog_ptr[tot_iplog-1].current_port = port;
         syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
@@ -184,7 +201,7 @@ void was_iplog_add(struct in_addr addr, long port)
         }
         else
         {
-            syslog( LOG_AUTH, "Second port hitted for ip &s but this ip does not exists in array of ips!", in_ipaddr);
+            syslog( LOG_AUTH, "Second port hitted for ip %s but this ip does not exists in array of ips!", in_ipaddr);
         }
     }
     else

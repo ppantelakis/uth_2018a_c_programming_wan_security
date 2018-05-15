@@ -20,7 +20,13 @@ void was_enable_signals();
 
 void was_daemon();
 
-//Chack if a specific ip exists to the array of ips
+//Check if IP is blocked
+int was_iplog_is_blocked(long);
+
+//Block IP for PORT_SCANNING_WAIT
+void was_iplog_block(long);
+
+//Check if a specific ip exists to the array of ips
 long was_iplog_find(struct in_addr);
 
 //Remove ip from array of ips

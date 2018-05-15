@@ -38,5 +38,6 @@ struct iplog_t
 {
     struct in_addr addr;
     time_t first_time;
+    time_t blocked_until_time;
     long   current_port;
 };
