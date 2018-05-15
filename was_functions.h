@@ -2,7 +2,7 @@
 //https://stackoverflow.com/questions/12722904/how-to-use-struct-timeval-to-get-the-execution-time
 long int was_get_curr_time_ms();
 
-//Function for getting current timestamp
+//Function for getting current timestamp in human format
 char* was_get_curr_time();
 
 //Function for insert iptables rule to iptables firewall

@@ -182,6 +182,10 @@ void was_iplog_add(struct in_addr addr, long port)
             }
             was_iplog_remove(i);
         }
+        else
+        {
+            syslog( LOG_AUTH, "Second port hitted for ip &s but this ip does not exists in array of ips!", in_ipaddr);
+        }
     }
     else
     {
