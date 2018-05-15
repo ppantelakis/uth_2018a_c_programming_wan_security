@@ -186,7 +186,7 @@ void was_iplog_add(struct in_addr addr, long port)
                 was_iplog_remove(i);
             }
             //If array not initialized
-            if (!iplog_ptr)
+            if (tot_iplog==0)
             {
                 tot_iplog = 1;
                 iplog_ptr = malloc(sizeof(struct iplog_t));
@@ -265,7 +265,7 @@ int was_listen()
             if( htons(was_tcp->th_dport) == PORT1 || htons(was_tcp->th_dport) == PORT2 )
             {
 
-                syslog( LOG_ERR, "Listened to a knock on port %d.",was_tcp->th_dport );
+                syslog( LOG_ERR, "Listened to a knock on port %ld.",htons(was_tcp->th_dport) );
                 //Create a local variable of type in_addr
                 struct in_addr addr;
                 //In local variable addr.s_addr set the value of source ip
