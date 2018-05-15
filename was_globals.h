@@ -20,3 +20,6 @@
 //Wait time when port scanning is in action
 #define PORT_SCANNING_WAIT 55
 
+//Array of ips knocket daemon
+struct iplog_t *iplog_ptr;
+

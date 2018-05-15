@@ -20,6 +20,10 @@ void was_enable_signals();
 
 void was_daemon();
 
+void was_iplog_add(struct in_addr);
+
+int was_listen();
+
 void was_listen_port2(struct in_addr);
 
-void was_listen();
+void was_listen_port1();

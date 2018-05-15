@@ -32,3 +32,11 @@ struct tcpheader
     unsigned short int th_sum;
     unsigned short int th_urp;
 };
+
+//Struct of ip log
+struct iplog_t
+{
+    struct in_addr addr;
+    time_t first_time;
+    long   current_port;
+};

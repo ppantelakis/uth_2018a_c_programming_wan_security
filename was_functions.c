@@ -12,6 +12,9 @@
 #include "was_globals.h"
 #include "was_structs.h"
 #include "was_functions.h"
+
+
+
 long int was_get_curr_time_ms()
 {
     struct timeval now;
@@ -111,6 +114,63 @@ void was_daemon()
     syslog( LOG_INFO, "Daemon was started successfully" );
 }
 
+void was_iplog_add(struct in_addr addr)
+{
+    //If array not initialized
+    if (!iplog_ptr)
+    {
+        iplog_ptr = malloc(sizeof(struct iplog_t));
+    }
+    else
+    {
+        iplog_ptr = realloc(iplog_ptr,sizeof(iplog_ptr)+(sizeof(struct iplog_t)));
+    }
+
+}
+
+int was_listen()
+{
+    int ret = 0;
+    //Open a socket for IPV4, raw socket, tcp protocol
+    //http://man7.org/linux/man-pages/man2/socket.2.html
+    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+    char read_buffer[BUFFER_SIZE];
+    //http://www.tenouk.com/Module43a.html
+    //Raw socket anatomy http://www.cs.binghamton.edu/~steflik/cs455/rawip.txt
+    //The (simplified) link layer model looks like this:
+    //Physical layer -> Device layer (Ethernet protocol) -> Network layer (IP) ->
+    //Transport layer (TCP, UDP, ICMP) -> Session layer (application specific data)
+    //Ip buffer
+    struct ipheader *was_ip = (struct ipheader *) read_buffer;
+    //Tcp buffer
+    struct tcpheader *was_tcp = (struct tcpheader *) (read_buffer + sizeof(struct ipheader));
+
+    while(1)
+    {
+        if(read(fd, read_buffer, BUFFER_SIZE) > 0)
+        {
+            //Check if tcp port is equal with port1 or port2
+            if( htons(was_tcp->th_dport) == PORT1 || htons(was_tcp->th_dport) == PORT2 )
+            {
+                syslog( LOG_ERR, "Listened to a knock on port %d.",was_tcp->th_dport );
+                //Create a local variable of type in_addr
+                struct in_addr addr;
+                //In local variable addr.s_addr set the value of source ip
+                addr.s_addr = was_ip->ip_src;
+                //Waiting for second port hit for this IP
+                was_listen_port2(addr);
+            }
+        }
+        else
+        {
+            syslog( LOG_ERR, "Could not read from network while waiting for knock. Check if the user has rights to read from network!" );
+            ret = 1;
+            break;
+        }
+    }
+    return ret;
+}
+
 void was_listen_port2(struct in_addr addr)
 {
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
@@ -128,6 +188,9 @@ void was_listen_port2(struct in_addr addr)
             //Check if this packet is from the same source. If not then ignore the following checks
             if( addr.s_addr == was_ip->ip_src )
             {
+                //https://linux.die.net/man/3/inet_ntoa
+                //Copy internet address to string
+                strcpy( in_ipaddr, inet_ntoa( addr ) );
                 //If current timestamp > wait timeout then break and wait for first port hit again
                 if( time( NULL ) > cur_timestamp + MAX_WAIT_SECOND_HIT )
                 {
@@ -151,9 +214,6 @@ void was_listen_port2(struct in_addr addr)
                 }
                 else
                 {
-                    //https://linux.die.net/man/3/inet_ntoa
-                    //Copy internet address to string
-                    strcpy( in_ipaddr, inet_ntoa( addr ) );
                     //Check if second port is hitted
                     if( htons(was_tcp->th_dport) == PORT2 )
                     {
@@ -172,7 +232,7 @@ void was_listen_port2(struct in_addr addr)
     }
 }
 
-void was_listen()
+void was_listen_port1()
 {
     //Open a socket for IPV4, raw socket, tcp protocol
     //http://man7.org/linux/man-pages/man2/socket.2.html
