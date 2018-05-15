@@ -15,11 +15,13 @@
 
 main()
 {
+    tot_iplog = 0;
     printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
     printf("Daemon has started at:%s\n",was_get_curr_time());
     was_enable_signals();
     was_daemon();
-    was_listen_port1();
+    was_listen();
+    //was_listen_port1();
     syslog( LOG_INFO, "WAS is exiting!" );
     return 0;
 }

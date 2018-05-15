@@ -23,3 +23,6 @@
 //Array of ips knocket daemon
 struct iplog_t *iplog_ptr;
 
+//Total longth of array of ips
+long tot_iplog;
+

@@ -114,19 +114,79 @@ void was_daemon()
     syslog( LOG_INFO, "Daemon was started successfully" );
 }
 
-void was_iplog_add(struct in_addr addr)
+long was_iplog_find(struct in_addr addr)
 {
-    //If array not initialized
-    if (!iplog_ptr)
+    long i, ret = -1;
+    for(i=0;i<tot_iplog;i++)
     {
-        iplog_ptr = malloc(sizeof(struct iplog_t));
+        if(iplog_ptr[i].addr.s_addr == addr.s_addr)
+        {
+            ret = i;
+        }
+    }
+    return ret;
+}
+
+void was_iplog_remove(long i)
+{
+    iplog_ptr[i] = iplog_ptr[tot_iplog-1];
+    free(&iplog_ptr[tot_iplog-1]);
+    tot_iplog--;
+    return;
+}
+
+void was_iplog_add(struct in_addr addr, long port)
+{
+    long i = was_iplog_find(addr);
+    char in_ipaddr[ 16 ];
+    strcpy( in_ipaddr, inet_ntoa( addr ) );
+    if(port==PORT1)
+    {
+        //If exist the ip then remove from the arry of ips and continue
+        if(i>=0)
+        {
+            was_iplog_remove(i);
+        }
+        //If array not initialized
+        if (!iplog_ptr)
+        {
+            tot_iplog = 1;
+            iplog_ptr = malloc(sizeof(struct iplog_t));
+        }
+        else
+        {
+            tot_iplog++;
+            iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
+        }
+        iplog_ptr[tot_iplog-1].addr = addr;
+        iplog_ptr[tot_iplog-1].first_time = time( NULL );
+        iplog_ptr[tot_iplog-1].current_port = port;
+        syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
+        syslog( LOG_ERR, "Size %d.",tot_iplog );
+    }
+    else if(port==PORT2)
+    {
+        //If exists the address that we are looking for then check if is valid the waiting time
+        if(i>=0)
+        {
+            //If
+            if( time( NULL ) < iplog_ptr[i].first_time + MAX_WAIT_SECOND_HIT )
+            {
+                //Go and open for specific ip
+                syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                was_iptables_add_rule(in_ipaddr);
+            }
+            was_iplog_remove(i);
+        }
     }
     else
     {
-        iplog_ptr = realloc(iplog_ptr,sizeof(iplog_ptr)+(sizeof(struct iplog_t)));
+        syslog( LOG_AUTH, "Port not found: %ld !", port);
     }
-
+    return;
 }
+
+//void
 
 int was_listen()
 {
@@ -152,13 +212,16 @@ int was_listen()
             //Check if tcp port is equal with port1 or port2
             if( htons(was_tcp->th_dport) == PORT1 || htons(was_tcp->th_dport) == PORT2 )
             {
+
                 syslog( LOG_ERR, "Listened to a knock on port %d.",was_tcp->th_dport );
                 //Create a local variable of type in_addr
                 struct in_addr addr;
                 //In local variable addr.s_addr set the value of source ip
                 addr.s_addr = was_ip->ip_src;
+
+                was_iplog_add(addr, htons(was_tcp->th_dport));
                 //Waiting for second port hit for this IP
-                was_listen_port2(addr);
+                //was_listen_port2(addr);
             }
         }
         else

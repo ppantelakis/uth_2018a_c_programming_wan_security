@@ -20,7 +20,14 @@ void was_enable_signals();
 
 void was_daemon();
 
-void was_iplog_add(struct in_addr);
+//Chack if a specific ip exists to the array of ips
+long was_iplog_find(struct in_addr);
+
+//Remove ip from array of ips
+void was_iplog_remove(long);
+
+//Add an ip to array of ips
+void was_iplog_add(struct in_addr,long);
 
 int was_listen();
 
