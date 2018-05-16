@@ -9,18 +9,16 @@
 //http://pubs.opengroup.org/onlinepubs/7908799/xns/arpainet.h.html
 //#include <arpa/inet.h>
 #include <string.h>
-#include "was_globals.h"
+//#include "was_tcp_globals.h"
 //#include "was_structs.h"
 
 
 main()
 {
-    tot_iplog = 0;
-    printf("Port sequence first:%d, second:%d\n",PORT1,PORT2);
     printf("Daemon has started at:%s\n",was_get_curr_time());
     was_enable_signals();
     was_daemon();
-    was_listen();
+    was_tcp_listen();
     //was_listen_port1();
     syslog( LOG_INFO, "WAS is exiting!" );
     return 0;
