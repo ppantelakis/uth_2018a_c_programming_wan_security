@@ -2,6 +2,8 @@
 #include "was_tcp_globals.h"
 #include "was_tcp_structs.h"
 
+//Function to add a firewall rule to iptables
+char* was_tcp_iptables_add_rule( char *);
 //Check if a specific struct in position i exists to the array of ips
 //Return true if exists, false if not
 int was_tcp_iplog_find_from_pos(long);

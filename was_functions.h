@@ -19,8 +19,8 @@ long int was_get_curr_time_ms();
 //Function for getting current timestamp in human format
 char* was_get_curr_time();
 
-//Function for insert iptables rule to iptables firewall
-char* was_iptables_add_rule( char * ip );
+//Function for execute a command to system
+char* was_system_exec_command( char * );
 
 //Function for application signals
 //http://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html

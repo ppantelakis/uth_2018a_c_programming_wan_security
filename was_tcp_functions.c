@@ -1,4 +1,11 @@
 #include "was_tcp_functions.h"
+char* was_tcp_iptables_add_rule( char * ip )
+{
+    static char cmd[ IPTABLES_CMD_SIZE ];
+    //iptables -I INPUT 2 -p tcp -m state --state NEW -m tcp -s 8.8.8.8 -m comment --comment \"was opened port at 12:23 28/02/2018\"  -j ACCEPT
+    sprintf( cmd, "iptables -I INPUT %d -p tcp -m state --state NEW -m tcp -s %s -m comment --comment \"was opened port at %s\"  -j ACCEPT", tcp_IPTABLES_CMD_LINE, ip,  was_get_curr_time());
+    return was_system_exec_command(cmd);
+}
 
 int was_tcp_iplog_find_from_pos(long i)
 {
@@ -117,7 +124,7 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
                 {
                     //Go and open for specific ip
                     syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
-                    was_iptables_add_rule(in_ipaddr);
+                    was_tcp_iptables_add_rule(in_ipaddr);
                 }
                 else
                 {

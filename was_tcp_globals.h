@@ -15,6 +15,9 @@
 //Wait time when port scanning is in action
 #define tcp_PORT_SCANNING_WAIT 55
 
+//Command line in iptables usually 2-3 first lines are used for loopback and established connections
+#define tcp_IPTABLES_CMD_LINE        3
+
 //Array of ips knocket daemon
 struct tcp_iplog_t *tcp_iplog_ptr;
 
