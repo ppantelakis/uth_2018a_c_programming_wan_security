@@ -7,33 +7,33 @@ char* was_tcp_iptables_add_rule( char * ip )
     return was_system_exec_command(cmd);
 }
 
-int was_tcp_iplog_find_from_pos(long i)
+int was_tcp_iplog_find_from_pos(long iplog_pos)
 {
     int ret = false;
-    if(i>=0)
+    if(iplog_pos>=0)
     {
         ret = true;
     }
     return ret;
 }
 
-int was_tcp_iplog_is_blocked(long i)
+int was_tcp_iplog_is_blocked(long iplog_pos)
 {
     int ret = true;
-    if(was_tcp_iplog_find_from_pos(i)==false || tcp_iplog_ptr[i].blocked_until_time<time( NULL ))
+    if(was_tcp_iplog_find_from_pos(iplog_pos)==false || tcp_iplog_ptr[iplog_pos].blocked_until_time<time( NULL ))
     {
         ret = false;
     }
     return ret;
 }
 
-void was_tcp_iplog_block(long i)
+void was_tcp_iplog_block(long iplog_pos)
 {
     char in_ipaddr[ 16 ];
-    if(was_tcp_iplog_find_from_pos(i)==true)
+    if(was_tcp_iplog_find_from_pos(iplog_pos)==true)
     {
-        strcpy( in_ipaddr, inet_ntoa( tcp_iplog_ptr[i].addr ) );
-        tcp_iplog_ptr[i].blocked_until_time = time( NULL ) + tcp_PORT_SCANNING_WAIT;
+        strcpy( in_ipaddr, inet_ntoa( tcp_iplog_ptr[iplog_pos].addr ) );
+        tcp_iplog_ptr[iplog_pos].blocked_until_time = time( NULL ) + tcp_PORT_SCANNING_WAIT;
         syslog( LOG_AUTH, "The ip %s has been blocked due to suspicius operations!", in_ipaddr);
     }
     return;
@@ -52,11 +52,11 @@ long was_tcp_iplog_find(struct in_addr addr)
     return ret;
 }
 
-void was_tcp_iplog_remove(long i)
+void was_tcp_iplog_remove(long iplog_pos)
 {
-    if(was_tcp_iplog_find_from_pos(i)==true)
+    if(was_tcp_iplog_find_from_pos(iplog_pos)==true)
     {
-        tcp_iplog_ptr[i] = tcp_iplog_ptr[tcp_tot_iplog-1];
+        tcp_iplog_ptr[iplog_pos] = tcp_iplog_ptr[tcp_tot_iplog-1];
         free(&tcp_iplog_ptr[tcp_tot_iplog-1]);
         tcp_tot_iplog--;
     }
@@ -199,5 +199,3 @@ int was_tcp_listen()
     }
     return ret;
 }
-
-
