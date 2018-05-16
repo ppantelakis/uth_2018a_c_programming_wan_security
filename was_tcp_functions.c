@@ -13,7 +13,7 @@ int was_tcp_iplog_find_from_pos(long i)
 int was_tcp_iplog_is_blocked(long i)
 {
     int ret = true;
-    if(was_tcp_iplog_find_from_pos(i)==false || iplog_ptr[i].blocked_until_time<time( NULL ))
+    if(was_tcp_iplog_find_from_pos(i)==false || tcp_iplog_ptr[i].blocked_until_time<time( NULL ))
     {
         ret = false;
     }
@@ -25,8 +25,8 @@ void was_tcp_iplog_block(long i)
     char in_ipaddr[ 16 ];
     if(was_tcp_iplog_find_from_pos(i)==true)
     {
-        strcpy( in_ipaddr, inet_ntoa( iplog_ptr[i].addr ) );
-        iplog_ptr[i].blocked_until_time = time( NULL ) + tcp_PORT_SCANNING_WAIT;
+        strcpy( in_ipaddr, inet_ntoa( tcp_iplog_ptr[i].addr ) );
+        tcp_iplog_ptr[i].blocked_until_time = time( NULL ) + tcp_PORT_SCANNING_WAIT;
         syslog( LOG_AUTH, "The ip %s has been blocked due to suspicius operations!", in_ipaddr);
     }
     return;
@@ -37,7 +37,7 @@ long was_tcp_iplog_find(struct in_addr addr)
     long i, ret = -1;
     for(i=0;i<tcp_tot_iplog;i++)
     {
-        if(iplog_ptr[i].addr.s_addr == addr.s_addr)
+        if(tcp_iplog_ptr[i].addr.s_addr == addr.s_addr)
         {
             ret = i;
         }
@@ -49,8 +49,8 @@ void was_tcp_iplog_remove(long i)
 {
     if(was_tcp_iplog_find_from_pos(i)==true)
     {
-        iplog_ptr[i] = iplog_ptr[tcp_tot_iplog-1];
-        free(&iplog_ptr[tcp_tot_iplog-1]);
+        tcp_iplog_ptr[i] = tcp_iplog_ptr[tcp_tot_iplog-1];
+        free(&tcp_iplog_ptr[tcp_tot_iplog-1]);
         tcp_tot_iplog--;
     }
     return;
@@ -62,14 +62,14 @@ int was_tcp_iplog_alloc()
     //If array not initialized
     if (tcp_tot_iplog==0)
     {
-        iplog_ptr = malloc(sizeof(struct tcp_iplog_t));
+        tcp_iplog_ptr = malloc(sizeof(struct tcp_iplog_t));
     }
     else
     {
-        iplog_ptr = realloc(iplog_ptr,tcp_tot_iplog+(sizeof(struct tcp_iplog_t)));
+        tcp_iplog_ptr = realloc(tcp_iplog_ptr,tcp_tot_iplog+(sizeof(struct tcp_iplog_t)));
     }
     //Check if malloc or realloc Succeeded
-    if(iplog_ptr==NULL)
+    if(tcp_iplog_ptr==NULL)
     {
         syslog( LOG_ERR, "Could not allocate memory on array of ips for new ip!!!");
     }
@@ -99,11 +99,11 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
 
             if(was_tcp_iplog_alloc()==true)
             {
-                iplog_ptr[tcp_tot_iplog-1].addr = addr;
-                iplog_ptr[tcp_tot_iplog-1].blocked_until_time = 0;
-                iplog_ptr[tcp_tot_iplog-1].first_time = time( NULL );
-                iplog_ptr[tcp_tot_iplog-1].current_port = port;
-                syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tcp_tot_iplog,inet_ntoa( iplog_ptr[tcp_tot_iplog-1].addr ),iplog_ptr[tcp_tot_iplog-1].first_time );
+                tcp_iplog_ptr[tcp_tot_iplog-1].addr = addr;
+                tcp_iplog_ptr[tcp_tot_iplog-1].blocked_until_time = 0;
+                tcp_iplog_ptr[tcp_tot_iplog-1].first_time = time( NULL );
+                tcp_iplog_ptr[tcp_tot_iplog-1].current_port = port;
+                syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tcp_tot_iplog,inet_ntoa( tcp_iplog_ptr[tcp_tot_iplog-1].addr ),tcp_iplog_ptr[tcp_tot_iplog-1].first_time );
                 syslog( LOG_ERR, "Size of array of ips %d.",tcp_tot_iplog );
             }
         }
@@ -113,7 +113,7 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
             if(was_tcp_iplog_find_from_pos(i)==true)
             {
                 //If
-                if( time( NULL ) < iplog_ptr[i].first_time + tcp_MAX_WAIT_SECOND_HIT )
+                if( time( NULL ) < tcp_iplog_ptr[i].first_time + tcp_MAX_WAIT_SECOND_HIT )
                 {
                     //Go and open for specific ip
                     syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);

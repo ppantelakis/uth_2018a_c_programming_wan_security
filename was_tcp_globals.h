@@ -16,7 +16,7 @@
 #define tcp_PORT_SCANNING_WAIT 55
 
 //Array of ips knocket daemon
-struct tcp_iplog_t *iplog_ptr;
+struct tcp_iplog_t *tcp_iplog_ptr;
 
 //Total longth of array of ips
 long tcp_tot_iplog;
