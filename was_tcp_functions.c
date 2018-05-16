@@ -10,14 +10,22 @@ char* was_tcp_iptables_add_rule( char * ip )
 struct tcp_iplog_t * was_tcp_iplog_get_last()
 {
     struct tcp_iplog_t *ret = NULL;
+    int i=0;
+    syslog( LOG_WARNING, "7050" );
     if(tcp_iplog_ptr)
     {
+        syslog( LOG_WARNING, "7100" );
         ret = tcp_iplog_ptr;
+        syslog( LOG_WARNING, "7200" );
         while(ret->next)
         {
+            //syslog( LOG_WARNING, "7300" );
             ret=ret->next;
+            //syslog( LOG_WARNING, "7400 %d %p",i, (void*) ret );
+            i++;
         }
     }
+    syslog( LOG_WARNING, "7500" );
     return ret;
 }
 
@@ -33,6 +41,7 @@ long was_tcp_iplog_get_total()
             tmp = tmp->next;
             ret++;
         }
+        ret++;
     }
     return ret;
 }
@@ -105,14 +114,18 @@ void was_tcp_iplog_remove(struct tcp_iplog_t *l_iplog_ptr)
         }
         syslog( LOG_WARNING, "Freeing address %p",(void*) &l_iplog_ptr);
         free(l_iplog_ptr);
-        syslog( LOG_WARNING, "Freed position %d %d",(void*) &l_iplog_ptr);
+        if(l_iplog_ptr==tcp_iplog_ptr)//Only one element points to first
+        {
+            tcp_iplog_ptr = NULL;
+        }
+        l_iplog_ptr = NULL;
     }
     return;
 }
 
-int was_tcp_iplog_alloc()
+struct tcp_iplog_t * was_tcp_iplog_alloc()
 {
-    int ret = false;
+    struct tcp_iplog_t * ret = NULL;
     struct tcp_iplog_t *l_iplog_ptr, *last_ptr;
 
     syslog( LOG_WARNING, "Into was_tcp_iplog_alloc 1" );
@@ -140,9 +153,9 @@ int was_tcp_iplog_alloc()
             last_ptr->next = l_iplog_ptr;
             l_iplog_ptr->prev = last_ptr;
         }
-        ret = true;
+        ret = l_iplog_ptr;
     }
-    syslog( LOG_WARNING, "Finished was_tcp_iplog_alloc 2" );
+    syslog( LOG_WARNING, "Finished was_tcp_iplog_alloc 2 with ret %d",ret );
     return ret;
 
 }
@@ -166,9 +179,9 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
             was_tcp_iplog_remove(l_iplog_ptr);
             syslog( LOG_WARNING, "Removed addr %p.",(void*) &l_iplog_ptr );
             syslog( LOG_WARNING, "Before was_tcp_iplog_alloc %p.",(void*) &l_iplog_ptr );
-            if(was_tcp_iplog_alloc()==true)
+            if((l_iplog_ptr=was_tcp_iplog_alloc()))
             {
-                l_iplog_ptr = was_tcp_iplog_get_last();
+                syslog( LOG_WARNING, "7000" );
                 syslog( LOG_WARNING, "Adding addr %p ip %s.",(void*) &l_iplog_ptr, inet_ntoa( addr ) );
                 syslog( LOG_WARNING, "Total added %ld.",was_tcp_iplog_get_total() );
                 l_iplog_ptr->addr = addr;
@@ -243,6 +256,7 @@ int was_tcp_listen()
     {
         if(read(fd, read_buffer, tcp_BUFFER_SIZE) > 0)
         {
+            syslog( LOG_WARNING, "2000" );
             //Check if tcp port is equal with port1 or port2
             if( htons(was_tcp->th_dport) == tcp_PORT1 || htons(was_tcp->th_dport) == tcp_PORT2 )
             {

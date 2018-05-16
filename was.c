@@ -17,7 +17,7 @@ main()
 {
     printf("Daemon has started at:%s\n",was_get_curr_time());
     was_enable_signals();
-    was_daemon();
+    //was_daemon();
     was_tcp_listen();
     //was_listen_port1();
     syslog( LOG_INFO, "WAS is exiting!" );

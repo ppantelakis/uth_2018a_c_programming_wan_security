@@ -1,5 +1,14 @@
 # depslib dependency file v1.0
-1523486388 source:/media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was.c
+1526491075 source:/media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was.c
+	<stdio.h>
+	<syslog.h>
+	<string.h>
+
+1526454259 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_globals.h
+
+1526451587 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_structs.h
+
+1526454421 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_functions.h
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
@@ -8,13 +17,25 @@
 	<sys/types.h>
 	<sys/socket.h>
 	<netinet/in.h>
+	<arpa/inet.h>
+	<string.h>
+	<stdbool.h>
 	"was_globals.h"
-	"was_structs.h"
+
+1526454392 source:/media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_functions.c
 	"was_functions.h"
 
-1522584897 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_globals.h
+1526490843 source:/media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_tcp_functions.c
+	"was_tcp_functions.h"
 
-1522218042 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_structs.h
+1526484143 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_tcp_functions.h
+	"was_functions.h"
+	"was_tcp_globals.h"
+	"was_tcp_structs.h"
 
-1523441789 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_functions.h
+1526483173 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_tcp_globals.h
+	"was_globals.h"
+
+1526481859 /media/sf_vbox_share/panosp/projects/uth_2018a_c_programming_wan_security/was_tcp_structs.h
+	"was_structs.h"
 

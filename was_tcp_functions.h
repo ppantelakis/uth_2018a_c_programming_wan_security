@@ -21,8 +21,8 @@ void was_tcp_iplog_block(struct tcp_iplog_t *);
 //Remove ip from array of ips
 void was_tcp_iplog_remove(struct tcp_iplog_t *iplog_ptr);
 
-//Allocate memory for new ip
-int was_tcp_iplog_alloc();
+//Allocate memory for new ip. Return pointer of new or NULL if not succeeds.
+struct tcp_iplog_t * was_tcp_iplog_alloc();
 
 //Add an ip to array of ips
 void was_tcp_iplog_add(struct in_addr,long);
