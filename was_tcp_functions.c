@@ -56,9 +56,14 @@ void was_tcp_iplog_remove(long iplog_pos)
 {
     if(was_tcp_iplog_find_from_pos(iplog_pos)==true)
     {
-        tcp_iplog_ptr[iplog_pos] = tcp_iplog_ptr[tcp_tot_iplog-1];
-        free(&tcp_iplog_ptr[tcp_tot_iplog-1]);
-        tcp_tot_iplog--;
+        if(iplog_pos<tcp_tot_iplog-1)
+        {
+            tcp_iplog_ptr[iplog_pos] = tcp_iplog_ptr[tcp_tot_iplog-1];
+        }
+        syslog( LOG_WARNING, "Freeing position %d %d",iplog_pos,tcp_tot_iplog-1);
+        //free(&tcp_iplog_ptr[tcp_tot_iplog-1]);
+        syslog( LOG_WARNING, "Freed position %d %d",iplog_pos,tcp_tot_iplog-1);
+        //tcp_tot_iplog--;
     }
     return;
 }
@@ -69,11 +74,11 @@ int was_tcp_iplog_alloc()
     //If array not initialized
     if (tcp_tot_iplog==0)
     {
-        tcp_iplog_ptr = malloc(sizeof(struct tcp_iplog_t));
+        tcp_iplog_ptr = (struct tcp_iplog_t *) malloc(sizeof(struct tcp_iplog_t));
     }
     else
     {
-        tcp_iplog_ptr = realloc(tcp_iplog_ptr,tcp_tot_iplog+(sizeof(struct tcp_iplog_t)));
+        tcp_iplog_ptr = (struct tcp_iplog_t *) realloc(tcp_iplog_ptr,tcp_tot_iplog*(sizeof(struct tcp_iplog_t)));
     }
     //Check if malloc or realloc Succeeded
     if(tcp_iplog_ptr==NULL)
@@ -153,7 +158,7 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
 
 int was_tcp_listen()
 {
-    int ret = 0;
+    int ret = 0, readed_bytes;
     //Open a socket for IPV4, raw socket, tcp protocol
     //http://man7.org/linux/man-pages/man2/socket.2.html
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
@@ -167,21 +172,22 @@ int was_tcp_listen()
     struct ip_header *was_ip = (struct ip_header *) read_buffer;
     //Tcp buffer
     struct tcp_header *was_tcp = (struct tcp_header *) (read_buffer + sizeof(struct ip_header));
+    //Create a local variable of type in_addr
+    struct in_addr addr;
+
     tcp_tot_iplog = 0;
 
     printf("Port sequence first:%d, second:%d\n",tcp_PORT1,tcp_PORT2);
 
     while(1)
     {
-        if(read(fd, read_buffer, tcp_BUFFER_SIZE) > 0)
+        if((readed_bytes=read(fd, read_buffer, tcp_BUFFER_SIZE)) > 0)
         {
             //Check if tcp port is equal with port1 or port2
             if( htons(was_tcp->th_dport) == tcp_PORT1 || htons(was_tcp->th_dport) == tcp_PORT2 )
             {
-
                 syslog( LOG_ERR, "Listened to a knock on port %ld.",htons(was_tcp->th_dport) );
-                //Create a local variable of type in_addr
-                struct in_addr addr;
+
                 //In local variable addr.s_addr set the value of source ip
                 addr.s_addr = was_ip->ip_src;
 
