@@ -23,5 +23,7 @@ struct tcp_iplog_t
     time_t first_time;
     time_t blocked_until_time;
     long   current_port;
+    struct tcp_iplog_t *next;
+    struct tcp_iplog_t *prev;
 };
 

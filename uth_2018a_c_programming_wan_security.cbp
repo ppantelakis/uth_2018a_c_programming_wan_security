@@ -45,6 +45,12 @@
 		<Unit filename="was_functions.h" />
 		<Unit filename="was_globals.h" />
 		<Unit filename="was_structs.h" />
+		<Unit filename="was_tcp_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="was_tcp_functions.h" />
+		<Unit filename="was_tcp_globals.h" />
+		<Unit filename="was_tcp_structs.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
