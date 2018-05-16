@@ -171,6 +171,32 @@ void was_iplog_remove(long i)
     return;
 }
 
+int was_iplog_alloc()
+{
+    int ret = false;
+    //If array not initialized
+    if (tot_iplog==0)
+    {
+        iplog_ptr = malloc(sizeof(struct iplog_t));
+    }
+    else
+    {
+        iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
+    }
+    //Check if malloc or realloc Succeeded
+    if(iplog_ptr==NULL)
+    {
+        syslog( LOG_ERR, "Could not allocate memory on array of ips for new ip!!!");
+    }
+    else
+    {
+        tot_iplog++;
+        ret = true;
+    }
+    return ret;
+
+}
+
 void was_iplog_add(struct in_addr addr, long port)
 {
     long i = was_iplog_find(addr);
@@ -185,23 +211,16 @@ void was_iplog_add(struct in_addr addr, long port)
             {
                 was_iplog_remove(i);
             }
-            //If array not initialized
-            if (tot_iplog==0)
+
+            if(was_iplog_alloc()==true)
             {
-                tot_iplog = 1;
-                iplog_ptr = malloc(sizeof(struct iplog_t));
+                iplog_ptr[tot_iplog-1].addr = addr;
+                iplog_ptr[tot_iplog-1].blocked_until_time = 0;
+                iplog_ptr[tot_iplog-1].first_time = time( NULL );
+                iplog_ptr[tot_iplog-1].current_port = port;
+                syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
+                syslog( LOG_ERR, "Size of array of ips %d.",tot_iplog );
             }
-            else
-            {
-                tot_iplog++;
-                iplog_ptr = realloc(iplog_ptr,tot_iplog+(sizeof(struct iplog_t)));
-            }
-            iplog_ptr[tot_iplog-1].addr = addr;
-            iplog_ptr[tot_iplog-1].blocked_until_time = 0;
-            iplog_ptr[tot_iplog-1].first_time = time( NULL );
-            iplog_ptr[tot_iplog-1].current_port = port;
-            syslog( LOG_ERR, "Added no %ld ip %s on time %ld.",tot_iplog,inet_ntoa( iplog_ptr[tot_iplog-1].addr ),iplog_ptr[tot_iplog-1].first_time );
-            syslog( LOG_ERR, "Size of array of ips %d.",tot_iplog );
         }
         else if(port==PORT2)
         {

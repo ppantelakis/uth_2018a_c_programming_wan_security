@@ -37,6 +37,9 @@ long was_iplog_find(struct in_addr);
 //Remove ip from array of ips
 void was_iplog_remove(long);
 
+//Allocate memory for new ip
+int was_iplog_alloc();
+
 //Add an ip to array of ips
 void was_iplog_add(struct in_addr,long);
 
