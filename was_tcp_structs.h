@@ -1,4 +1,7 @@
-#include "was_structs.h"
+#ifndef was_structs
+    #include "was_structs.h"
+    #define was_structs 1
+#endif
 //TCP Header Length
 //https://en.wikipedia.org/wiki/Transmission_Control_Protocol
 //20 Bytes = 160 bits

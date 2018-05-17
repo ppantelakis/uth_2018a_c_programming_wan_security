@@ -1,4 +1,8 @@
-#include "was_tcp_functions.h"
+#ifndef was_tcp_functions
+    #include "was_tcp_functions.h"
+    #define was_tcp_functions 1
+#endif
+
 char* was_tcp_iptables_add_rule( char * ip )
 {
     static char cmd[ IPTABLES_CMD_SIZE ];

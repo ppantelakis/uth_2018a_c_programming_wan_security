@@ -1,4 +1,8 @@
-#include "was_globals.h"
+#ifndef was_globals
+    #include "was_globals.h"
+    #define was_globals 1
+#endif
+
 //First Port
 #define tcp_PORT1 43657
 

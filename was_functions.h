@@ -10,7 +10,11 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdbool.h>
-#include "was_globals.h"
+
+#ifndef was_globals
+    #include "was_globals.h"
+    #define was_globals 1
+#endif
 
 //Function for getting current timestamp in milliseconds
 //https://stackoverflow.com/questions/12722904/how-to-use-struct-timeval-to-get-the-execution-time

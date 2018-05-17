@@ -1,6 +1,17 @@
-#include "was_functions.h"
-#include "was_tcp_globals.h"
-#include "was_tcp_structs.h"
+#ifndef was_functions
+    #include "was_functions.h"
+    #define was_functions 1
+#endif
+
+#ifndef was_tcp_globals
+    #include "was_tcp_globals.h"
+    #define was_tcp_globals 1
+#endif
+
+#ifndef was_tcp_structs
+    #include "was_tcp_structs.h"
+    #define was_tcp_structs 1
+#endif
 
 //Function to add a firewall rule to iptables
 char* was_tcp_iptables_add_rule( char *);
