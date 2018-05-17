@@ -17,7 +17,7 @@ char* was_get_curr_time()
 }
 char* was_system_exec_command( char * cmd )
 {
-    syslog( LOG_AUTH, "Executed command : %s ", cmd);
+    syslog( LOG_WARNING, "Executed command : %s ", cmd);
     system( cmd );
     return cmd;
 }

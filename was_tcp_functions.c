@@ -85,7 +85,7 @@ void was_tcp_iplog_block(struct tcp_iplog_t *l_iplog_ptr)
     {
         strcpy( in_ipaddr, inet_ntoa( l_iplog_ptr->addr ) );
         l_iplog_ptr->blocked_until_time = time( NULL ) + tcp_PORT_SCANNING_WAIT;
-        syslog( LOG_AUTH, "The ip %s has been blocked due to suspicius operations!", in_ipaddr);
+        syslog( LOG_ERR, "The ip %s has been blocked due to suspicius operations!", in_ipaddr);
     }
     return;
 }
@@ -186,28 +186,28 @@ void was_tcp_iplog_add(struct in_addr addr, long port)
                 if( time( NULL ) < l_iplog_ptr->first_time + tcp_MAX_WAIT_SECOND_HIT )
                 {
                     //Go and open for specific ip
-                    syslog( LOG_AUTH, "Success combination of ports hits for ip: %s !", in_ipaddr);
+                    syslog( LOG_WARNING, "Success combination of ports hits for ip: %s !", in_ipaddr);
                     was_tcp_iptables_add_rule(in_ipaddr);
                 }
                 else
                 {
-                    syslog( LOG_AUTH, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
+                    syslog( LOG_WARNING, "Timeout limit passed on second hit for ip: %s !", in_ipaddr);
                 }
                 was_tcp_iplog_remove(l_iplog_ptr);
             }
             else
             {
-                syslog( LOG_AUTH, "Second port hitted for ip %s but this ip does not exists in array of ips!", in_ipaddr);
+                syslog( LOG_ERR, "Second port hitted for ip %s but this ip does not exists in array of ips!", in_ipaddr);
             }
         }
         else
         {
-            syslog( LOG_AUTH, "Port not found: %ld !", port);
+            syslog( LOG_ERR, "Port not found: %ld !", port);
         }
     }
     else
     {
-        syslog( LOG_AUTH, "The ip %s has already been blocked due to suspicius operations!", in_ipaddr);
+        syslog( LOG_ERR, "The ip %s has already been blocked due to suspicius operations!", in_ipaddr);
     }
     return;
 }
