@@ -36,6 +36,7 @@
 			<Option target="Release" />
 		</Unit>
 		<Unit filename="makefile" />
+		<Unit filename="tests.sh" />
 		<Unit filename="was.c">
 			<Option compilerVar="CC" />
 		</Unit>

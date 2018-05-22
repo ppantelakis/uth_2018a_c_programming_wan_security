@@ -239,6 +239,7 @@ int was_tcp_listen()
 
     while(1)
     {
+        //TODO: I want to read the data that came with tcp
         if(read(fd, read_buffer, tcp_BUFFER_SIZE) > 0)
         {
             //Check if tcp port is equal with port1 or port2
