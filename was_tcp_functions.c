@@ -243,6 +243,7 @@ int was_tcp_listen()
         if(read(fd, read_buffer, tcp_BUFFER_SIZE) > 0)
         {
             //Check if tcp port is equal with port1 or port2
+            //syslog( LOG_ERR, "Listened to a knock on port %ld.",htons(was_tcp->th_dport) );
             if( htons(was_tcp->th_dport) == tcp_PORT1 || htons(was_tcp->th_dport) == tcp_PORT2 )
             {
                 syslog( LOG_ERR, "Listened to a knock on port %ld.",htons(was_tcp->th_dport) );
